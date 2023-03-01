@@ -1,6 +1,7 @@
 const userlogin = require("../models/userLogin")
 const bcrypt = require("bcryptjs")
 const jwt = require('jsonwebtoken');
+const { use } = require("../routers/productRouter");
 
 let register = async  (req, res, next ) => {
     try {
@@ -87,8 +88,7 @@ let dropUser = async (req, res, next)=>{
 
 let updateUser = async( req, res, next)=>{
     try{
-        let id = req.params.id
-        console.log("............:", id)
+        let {id} = req.params
         let user = await userlogin.findOneAndUpdate({id:id},
             { $set:{
                 name :req.body.name,
@@ -117,6 +117,22 @@ let updateUser = async( req, res, next)=>{
     }
 }
 
+let patchUser = async(req, res , next)=>{
+    try{
+        let id = req.params._id
+        let user = await userlogin.findByIdAndUpdate({id:id},{
+            $set:req.body
+             })
+        console.log("===========",user)
+    }
+    catch(error){
+        console.log(error)
+        res.status(500).json({
+            error: error.message
+        })
+    }
+}
+
 
 
 module.exports = {
@@ -124,5 +140,6 @@ module.exports = {
     userLogin,
     getusers,
     dropUser,
-    updateUser
+    updateUser,
+    patchUser
 }

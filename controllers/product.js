@@ -26,6 +26,29 @@ catch(error){
 }
 }
 
+let updateProduct = async(req, res, next)=>{
+    try{
+        let id= req.params.id
+        console.log(id)
+        let data = await productModel.findById(id)
+             data.sellingPrice = req.body.sellingPrice;
+             console.log(data)
+         await data.save()
+            res.status(200).send({
+                message: "==========",
+                result : data
+            })
+    }
+    catch(error){
+        res.status(500).send({
+            message:"something wrong in data updating ....",
+            error: error
+
+        })
+    }
+}
+
 module.exports = {
-    addProduct
+    addProduct,
+    updateProduct
 }

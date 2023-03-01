@@ -20,7 +20,9 @@ const port = process.env.port || 9000;
 
 mongoose.connect("mongodb://localhost/userLogingDB",{
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    // useFindAndModify: false
+
 }).then(()=>console.log("database is connected successfully........"))
 .catch((error)=>console.log("DateBase connection error : ",error))
 

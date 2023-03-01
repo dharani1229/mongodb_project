@@ -10,6 +10,8 @@ router.post("/userLogin", authController.userLogin)
 router.get("/getAllUsers",authController.getusers)
 router.delete("/dropUser/:id",authController.dropUser)
 router.put("/updateUser/:id",authController.updateUser)
+router.patch("/UPDATE/:id", authController.patchUser)
+
 
 
 module.exports = router;
