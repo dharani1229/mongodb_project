@@ -8,20 +8,26 @@ const productSchema = new mongoose.Schema({
     modelName: {
         type: String,
         required: true,
-        unique: true
     },
     mrp: {
         type: String,
         required: true,
-        unique: true
     },
     sellingPrice: {
         type: String,
         required: true
     },
+    sellingPriceDate: {
+        type: String,
+        require:true
+    },
     soldPrice: {
         type: String,
         required: true
+    },
+    Date:{
+        type: Date,
+        default: Date.now
     }
 });
 

@@ -1,52 +1,98 @@
-const userlogin = require("../models/userLogin")
+const userModel = require("../models/userLogin")
 const bcrypt = require("bcryptjs")
 const jwt = require('jsonwebtoken');
+//const cookie = require("cookie-parser")
 const { use } = require("../routers/productRouter");
+const secretKey = require("../config/authKey")
 
-let register = async  (req, res, next ) => {
+
+
+// REGISTER
+let register = async (req, res, next) => {
     try {
-        const { name, email, password, phonenumber,GSTnumber,pancard,DOb} = req.body;
-        const existingUser = await userlogin.findOne({ email: email });
+        const { name, email, password, phonenumber, GSTnumber, pancard, DOb } = req.body;
+        const existingUser = await userModel.findOne({ email: email });
         if (existingUser) {
             return res.status(400).json({ message: 'User already exists' });
         }
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new userlogin({ name, email, password: hashedPassword,phonenumber,GSTnumber,pancard,DOb });
-        await user.save();
-        res.status(201).json({ message: 'User created successfully' });
-    } catch (error) {
+
+        const getSalt = await bcrypt.genSaltSync(10)
+
+        const hashedPassword = await bcrypt.hashSync(password, getSalt)
+
+        const newUser = new userModel({ name, email, password: hashedPassword, phonenumber, GSTnumber, pancard, DOb });
+
+        
+            const user=  {
+                id: newUser.id
+            }
+
+        let tocken = jwt.sign(user, secretKey);
+
+        await newUser.save((error) => {
+            if (error) {
+                console.log(error)
+            }
+
+        })
+
+        res.status(201).json({
+            message: 'User created successfully',
+            data: newUser,
+            token: tocken
+        });
+
+    }
+    catch (error) {
         console.log(error)
         res.status(500).json({ message: 'Something went wrong' });
     }
 }
 
-let userLogin = async (req, res)=>{
-    try{
-        const {email, password } = req.body;
-        const existingUser = await userlogin.findOne({email});
-        if(!existingUser){
+
+
+
+
+
+
+
+// USERLOGIN
+
+let userLogin = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        console.log("eamil", email, "password", password)
+        const existingUser = await userModel.findOne({ email: email });
+
+        if (!existingUser) {
             return res.status(400).send({
-                message: "user not existed yet "
+                message: "<<  entered wrong email >>"
             })
         }
-        const existingUserPassword = await bcrypt.compare(password,existingUser.password)
-        if(!existingUserPassword){
-            res.status(401).send({
+
+        const existingUserPassword = await bcrypt.compare(password, existingUser.password);
+
+        if (!existingUserPassword) {
+            res.status(400).send({
                 message: "<<< password is not matched  >>>"
+
             })
         }
 
+        const tocken = jwt.sign({ urlId: existingUser._id, email: existingUser.email }, secretKey)
+        console.log("tocken --------->", tocken)
 
-        const tocken = jwt.sign({urlId: existingUser._id, email: existingUser.email},
-            "vecrepScreate")
+        res.cookie("token", tocken)
+        existingUser.tocken = tocken
 
-        res.cookie("tocken", tocken)
+        await existingUser.save()
 
         res.status(200).send({
-            message: "userSuccessfully loging "
+            message: "userSuccessfully loging ",
+            tocken: tocken,
         })
     }
-    catch(error){
+    catch (error) {
         res.status(500).send({
             message: "something went wrong ",
             error: error
@@ -54,16 +100,23 @@ let userLogin = async (req, res)=>{
     }
 }
 
-let getusers = async(req,res,next)=>{
-    try{
-        let allusers = await userlogin.find()
+let getusers = async (req, res, next) => {
+    try {
+         
+          let email = req.body.email;
+          let findUsers = await userModel.findOne({email: email})
+          console.log(findUsers)
+
+        // let allusers = await userlogin.findOne()
         res.status(200).send({
             message: "got all users",
-            users: allusers
+            users:  "get user successfully",
+           allUsers : findUsers
         })
 
     }
-    catch (error){
+    catch (error) {
+        console.log(error)
         res.status(400).send({
             message: "error in the get users",
             error: error
@@ -71,35 +124,39 @@ let getusers = async(req,res,next)=>{
     }
 }
 
-let dropUser = async (req, res, next)=>{
-    try{
+
+
+
+let dropUser = async (req, res, next) => {
+    try {
         //let email = req.params
-        let user = await userlogin.findByIdAndDelete(req.params.id)
-        allUsers = await userlogin.find()
+        let findUser = await userlogin.findByIdAndDelete(req.params.id)
+        allUsers = await userModel.find()
         res.status(200).send({
             message: " good result",
-            result : allUsers
+            result: allUsers
         })
     }
-    catch(error){
+    catch (error) {
         res.send(error)
     }
 }
-
-let updateUser = async( req, res, next)=>{
-    try{
-        let {id} = req.params
-        let user = await userlogin.findOneAndUpdate({id:id},
-            { $set:{
-                name :req.body.name,
-                 email: req.body.email,
-                  password:req.body.password,
-                   phonenumber: req.body.phonenumber,
-                   GSTnumber : req.body.GSTnumber,
-                   pancard: req.body.pancard,
-                   DOb: req.body.DOb
+// UPDATE USER-------
+let updateUser = async (req, res, next) => {
+    try {
+        let { id } = req.params
+        let findUser = await userModel.findOneAndUpdate({ id: id },
+            {
+                $set: {
+                    name: req.body.name,
+                    email: req.body.email,
+                    password: req.body.password,
+                    phonenumber: req.body.phonenumber,
+                    GSTnumber: req.body.GSTnumber,
+                    pancard: req.body.pancard,
+                    DOb: req.body.DOb
                 }
-            } 
+            }
         )
 
         res.status(200).send({
@@ -108,7 +165,7 @@ let updateUser = async( req, res, next)=>{
         })
 
     }
-    catch(error){
+    catch (error) {
         console.log(error)
         res.status(500).send({
             message: "user not updated someing went wrong",
@@ -117,23 +174,7 @@ let updateUser = async( req, res, next)=>{
     }
 }
 
-let patchUser = async(req, res , next)=>{
-    try{
-        let id = req.params._id
-        let user = await userlogin.findByIdAndUpdate({id:id},{
-            $set:req.body
-             })
-        console.log("===========",user)
-    }
-    catch(error){
-        console.log(error)
-        res.status(500).json({
-            error: error.message
-        })
-    }
-}
-
-
+ 
 
 module.exports = {
     register,
@@ -141,5 +182,5 @@ module.exports = {
     getusers,
     dropUser,
     updateUser,
-    patchUser
+   
 }

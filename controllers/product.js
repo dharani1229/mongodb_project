@@ -10,6 +10,7 @@ let addProduct = async ( req, res , next )=>{
         modelName: req.body.modelName,
         mrp : req.body.mrp,
         sellingPrice: req.body.sellingPrice,
+        sellingPriceDate: req.body.sellingPriceDate,
         soldPrice: req.body.soldPrice
        })
 
@@ -22,7 +23,7 @@ let addProduct = async ( req, res , next )=>{
 }
 catch(error){
     console.log(error)
-    res.status(500).send("someThing went wrong ")
+    res.status(500).send("add product properlly ... ")
 }
 }
 
@@ -32,7 +33,8 @@ let updateProduct = async(req, res, next)=>{
         console.log(id)
         let data = await productModel.findById(id)
              data.sellingPrice = req.body.sellingPrice;
-             console.log(data)
+             data.sellingPriceDate = req.body.sellingPriceDate;
+           //  console.log(data)
          await data.save()
             res.status(200).send({
                 message: "==========",
@@ -48,7 +50,27 @@ let updateProduct = async(req, res, next)=>{
     }
 }
 
+
+
+let productDetails = async(req , res , next )=>{
+
+    try{
+        let id= req.body.id;
+        console.log(id)
+        let productData = await productModel.findById(id)
+        res.status(200).send({
+            message: " successfully product finded",
+            Details: productData
+        })
+    }
+    catch(error){
+        console.log(error)
+    }
+}
+
+
 module.exports = {
     addProduct,
-    updateProduct
+    updateProduct,
+    productDetails
 }

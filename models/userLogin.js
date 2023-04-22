@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema({
     },
     DOb: { 
         type: String
+    },
+    tocken:{
+        type: String,
+        require: true
     }
 });
 
