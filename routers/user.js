@@ -1,12 +1,12 @@
 const express = require('express')
 const router = express.Router();
-const authController = require("../controllers/authUserController")
+const authController = require("../controllers/user")
 const verification = require("../middleware/userAuthenticate")
 
 
-router.post("/adduser", authController.register)
+router.post("/userRegister", authController.register)
 router.post("/userLogin", authController.userLogin)
-router.get("/getAllUsers",verification, authController.getusers)
+router.get("/getUser",verification, authController.getusers)
 router.delete("/dropUser/:id",authController.dropUser)
 router.put("/updateUser/:id",authController.updateUser)
 

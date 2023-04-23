@@ -1,8 +1,6 @@
-const userModel = require("../models/userLogin")
+const userModel = require("../models/user")
 const bcrypt = require("bcryptjs")
 const jwt = require('jsonwebtoken');
-//const cookie = require("cookie-parser")
-const { use } = require("../routers/productRouter");
 const secretKey = require("../config/authKey")
 
 
@@ -22,13 +20,6 @@ let register = async (req, res, next) => {
 
         const newUser = new userModel({ name, email, password: hashedPassword, phonenumber, GSTnumber, pancard, DOb });
 
-        
-            const user=  {
-                id: newUser.id
-            }
-
-        let tocken = jwt.sign(user, secretKey);
-
         await newUser.save((error) => {
             if (error) {
                 console.log(error)
@@ -37,9 +28,7 @@ let register = async (req, res, next) => {
         })
 
         res.status(201).json({
-            message: 'User created successfully',
-            data: newUser,
-            token: tocken
+            message: 'User created successfully'
         });
 
     }
@@ -61,7 +50,7 @@ let register = async (req, res, next) => {
 let userLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log("eamil", email, "password", password)
+
         const existingUser = await userModel.findOne({ email: email });
 
         if (!existingUser) {
@@ -80,7 +69,6 @@ let userLogin = async (req, res) => {
         }
 
         const tocken = jwt.sign({ urlId: existingUser._id, email: existingUser.email }, secretKey)
-        console.log("tocken --------->", tocken)
 
         res.cookie("token", tocken)
         existingUser.tocken = tocken
@@ -102,16 +90,16 @@ let userLogin = async (req, res) => {
 
 let getusers = async (req, res, next) => {
     try {
-         
-          let email = req.body.email;
-          let findUsers = await userModel.findOne({email: email})
-          console.log(findUsers)
 
-        // let allusers = await userlogin.findOne()
+        let email = req.body.email;
+        let findUser = await userModel.findOne({ email: email })
+
         res.status(200).send({
-            message: "got all users",
-            users:  "get user successfully",
-           allUsers : findUsers
+            message: "User Data",
+            userName: findUser.name,
+            email: findUser.email,
+            phoneNumber: findUser.phonenumber
+
         })
 
     }
@@ -129,58 +117,62 @@ let getusers = async (req, res, next) => {
 
 let dropUser = async (req, res, next) => {
     try {
-        //let email = req.params
-        let findUser = await userlogin.findByIdAndDelete(req.params.id)
-        allUsers = await userModel.find()
+        let id = req.params.id
+        console.log(id)
+        let findUser = await userModel.findByIdAndRemove({_id:id})
+    
         res.status(200).send({
-            message: " good result",
-            result: allUsers
+            message: " user Deleter",
         })
     }
     catch (error) {
-        res.send(error)
+        console.log(error)
+        res.status(500).send({
+            message: "server error",
+            error: error
+        })
     }
 }
 // UPDATE USER-------
 let updateUser = async (req, res, next) => {
     try {
-        let { id } = req.params
-        let findUser = await userModel.findOneAndUpdate({ id: id },
-            {
-                $set: {
-                    name: req.body.name,
-                    email: req.body.email,
-                    password: req.body.password,
-                    phonenumber: req.body.phonenumber,
-                    GSTnumber: req.body.GSTnumber,
-                    pancard: req.body.pancard,
-                    DOb: req.body.DOb
-                }
-            }
-        )
+        let id = req.params.id
+        console.log(id)
+        let findUser = await userModel.findById({ _id: id })
+        console.log(findUser)
+        await findUser.updateOne({
+
+            name: req.body.name || findUser.name,
+            email: req.body.email || findUser.email,
+            password: req.body.password || findUser.password,
+            phonenumber: req.body.phonenumber || findUser.phonenumber,
+            GSTnumber: req.body.GSTnumber || findUser.GSTnumber,
+            pancard: req.body.pancard || findUser.pancard,
+            DOb: req.body.DOb || findUser.DOb
+        })
+
+        await findUser.save()
 
         res.status(200).send({
-            message: "good job",
-            result: user
+            message: "user updated"
         })
 
     }
     catch (error) {
         console.log(error)
         res.status(500).send({
-            message: "user not updated someing went wrong",
+            message: "server error",
             error: error
         })
     }
 }
 
- 
+
 
 module.exports = {
     register,
     userLogin,
     getusers,
     dropUser,
-    updateUser,
-   
+    updateUser
 }

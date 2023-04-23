@@ -1,8 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser")
-const userRouter = require('./routers/authRouter');
-const productRouter  = require("./routers/productRouter")
+const userRouter = require('./routers/user');
+const productRouter  = require("./routers/product")
 const booking = require("./routers/booking")
 const cors = require("cors");
 
