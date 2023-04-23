@@ -21,11 +21,9 @@ app.use(booking)
 
 const port = process.env.port || 5000;
 
-mongoose.connect("mongodb://localhost/userLogingDB",{
+mongoose.connect("mongodb://localhost/Vbooking",{
     useNewUrlParser: true,
-    useUnifiedTopology: true,
-    // useFindAndModify: false
-
+    useUnifiedTopology: true
 }).then(()=>console.log("database is connected successfully........"))
 .catch((error)=>console.log("DateBase connection error : ",error))
 
