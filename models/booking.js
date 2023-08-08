@@ -1,8 +1,16 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
 const booking = new mongoose.Schema({
-    names :Array
+  productId: {
+    type: String,
+  },
+  bookingDate: {
+    type: String,
+    default: Date.now,
+  },
+  quantitySold: {
+    type: Number,
+  },
+});
 
-})
-
-module.exports = mongoose.model("booking",booking )
+module.exports = mongoose.model("booking", booking);

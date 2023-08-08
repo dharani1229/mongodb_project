@@ -28,7 +28,15 @@ const productSchema = new mongoose.Schema({
     Date:{
         type: Date,
         default: Date.now
-    }
+    },
+    quantity: {
+        type: Number,
+        default: 1,
+      },
+      sold: {
+        type: Boolean,
+        default: false,
+      }
 });
 
 module.exports = mongoose.model("product", productSchema);

@@ -1,8 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser")
-const userRouter = require('./routers/authRouter');
-const productRouter  = require("./routers/productRouter")
+const userRouter = require('./routers/user');
+const productRouter  = require("./routers/product")
 const booking = require("./routers/booking")
 const cors = require("cors");
 
@@ -21,10 +21,15 @@ app.use(booking)
 
 const port = process.env.port || 5000;
 
-mongoose.connect("mongodb://localhost/Vbooking",{
+
+//mongodb://localhost/Vbooking
+//"mongodb+srv://vbooking:vbooking@cluster0.fqavivz.mongodb.net/test"
+mongoose.connect("mongodb://localhost/Vbooking", {
     useNewUrlParser: true,
     useUnifiedTopology: true
-}).then(()=>console.log("database is connected successfully........"))
-.catch((error)=>console.log("DateBase connection error : ",error))
+}).then(() => { console.log("dataBase is connected") })
+    .catch(error => {
+        console.log(error)
+    })
 
 app.listen(port,()=>console.log("server running successfully ............"))
